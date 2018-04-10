@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hwua.common.dao.ProductMapper">
+    <select id="queryAll" resultType="map">
+        SELECT * FROM category
+    </select>
+    <select id="queryAllProduct" resultType="product">
+        SELECT product.id,product.picture,product.brand_id,product.inventory,product.describes,product.category_id,product.pname,product.xprice,product.yprice,product.status,IF(isput = 0,'已发布','已下架')isput FROM product WHERE status =0
+    </select>
+    <update id="updateProduct" parameterType="product">
+        UPDATE product SET brand_id=#{brand_id},inventory=#{inventory},describes=#{describes},category_id=#{category_id},pname=#{pname},xprice=#{xprice},yprice=#{yprice} WHERE id=#{id}
+    </update>
+    <update id="deleteProduct" parameterType="int">
+        UPDATE product SET status =1 WHERE id =#{id}
+    </update>
+    <update id="xj" parameterType="int">
+        UPDATE product SET isput ='1' WHERE id =#{id}
+    </update>
+    <update id="sj" parameterType="int">
+        UPDATE product SET isput ='0' WHERE id =#{id}
+    </update>
+    <insert id="addProduct" parameterType="product">
+        INSERT INTO product (BRAND_ID,INVENTORY,DESCRIBES,CATEGORY_ID,PNAME,XPRICE,YPRICE) VALUES (#{brand_id},#{inventory},#{describes},#{category_id},#{pname},#{xprice},#{yprice})
+    </insert>
+    <select id="queryById" resultType="map" parameterType="int">
+        SELECT id,NAME FROM brand WHERE ID IN (SELECT BID FROM brand_category WHERE CID=#{cid})
+    </select>
+    <select id="queryByCid" parameterType="int" resultType="product">
+        SELECT * FROM product WHERE CATEGORY_ID=#{category_id}
+    </select>
+    <select id="queryByBCid" resultType="product" parameterType="int">
+        SELECT * FROM product WHERE CATEGORY_ID=#{arg0} AND BRAND_ID=#{arg1}
+    </select>
+    <select id="query" parameterType="int" resultType="product">
+        SELECT * FROM product WHERE ID=#{id}
+    </select>
+    <select id="queryOrder" resultType="product">
+        SELECT T.ID,T.PICTURE,T.PNAME,T.DESCRIBES,T.XPRICE,T.YPRICE,T.C FROM(SELECT ID,PICTURE,PNAME,DESCRIBES,XPRICE,YPRICE,(YPRICE - XPRICE) C FROM product ORDER BY yprice-xprice DESC) T
+    </select>
+    <select id="queryMoHu" resultType="product" parameterType="string">
+        SELECT product.id,product.picture,product.brand_id,product.inventory,product.describes,product.category_id,product.pname,product.xprice,product.yprice,product.status,IF(isput = 0,'已发布','已下架')isput FROM product WHERE PNAME LIKE concat(concat('%',#{pname}),'%') AND status=0
+    </select>
+    <insert id="addCart" parameterType="map">
+        INSERT INTO member_cart (mid,pid,count) VALUES (#{mid},#{pid},#{count})
+    </insert>
+    <insert id="addOrders" parameterType="map">
+        <selectKey resultType="int" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO orders (mid,create_time,price,status,aid) VALUES (#{mid},#{create_time},#{price},0,#{aid})
+    </insert>
+    <update id="updateOrdersTime" parameterType="map">
+        UPDATE orders SET pay_time=#{pay_time} WHERE id=#{id}
+    </update>
+    <insert id="addOrders_detail" parameterType="map">
+        INSERT INTO orders_detail (oid, pid,count) VALUES (#{oid},#{pid},#{count})
+    </insert>
+    <select id="queryCartId" resultType="map">
+        SELECT member_cart.mid FROM member_cart,member WHERE member_cart.mid=member.ID
+    </select>
+    <select id="queryCartByMid" parameterType="int" resultType="map">
+     SELECT product.*,member_cart.*,member_cart.count*product.XPRICE m FROM member_cart,product WHERE member_cart.mid=#{mid} AND member_cart.pid=product.ID
+    </select>
+    <select id="queryOrdersId" parameterType="int" resultType="map">
+      SELECT orders.ID FROM orders,member WHERE orders.mid = #{mid} AND orders.mid = member.ID
+    </select>
+    <select id="queryOrdersByOid" resultType="map" parameterType="int">
+        SELECT product.*,orders_detail.*,orders_detail.count*product.XPRICE m FROM orders_detail,product WHERE orders_detail.OID=#{oid} AND orders_detail.pid=product.ID
+    </select>
+    <select id="queryCartByPid" parameterType="int" resultType="map">
+        SELECT * FROM member_cart WHERE pid = #{pid}
+    </select>
+    <select id="queryOrders_detailByPid" parameterType="int" resultType="map">
+        SELECT * FROM orders_detail WHERE pid = #{pid}
+    </select>
+    <update id="updateCount1" parameterType="int">
+        UPDATE member_cart SET count=count+1 WHERE pid = #{pid}
+    </update>
+    <update id="updateCount" parameterType="int">
+        UPDATE member_cart SET count =#{arg0} WHERE pid = #{arg1}
+    </update>
+    <select id="sm" parameterType="int" resultType="map">
+        SELECT SUM(orders_detail.count*product.XPRICE) s FROM orders_detail,product WHERE orders_detail.oid=#{oid} AND orders_detail.pid=product.ID
+    </select>
+    <select id="smCart" parameterType="int" resultType="map">
+        SELECT SUM(member_cart.count*product.XPRICE) s FROM member_cart,product WHERE member_cart.mid=#{mid} AND member_cart.pid=product.ID
+    </select>
+    <update id="updateOrdersStatus" parameterType="int">
+        UPDATE orders SET status = #{arg0} WHERE id = #{arg1}
+    </update>
+    <select id="queryAllCart" resultType="map" parameterType="int">
+        SELECT * FROM member_cart WHERE mid = #{mid}
+    </select>
+    <delete id="deleteCart" parameterType="int">
+        DELETE FROM member_cart WHERE pid=#{pid}
+    </delete>
+    <delete id="deleteOrders_detail" parameterType="int">
+        DELETE FROM orders_detail WHERE oid=#{oid}
+    </delete>
+    <select id="queryOrders" parameterType="int" resultType="map">
+        SELECT address.name,address.addre,orders.*,CASE orders.status WHEN '0'THEN '待付款' WHEN '1'THEN '待收货' WHEN '2'THEN '已发货'WHEN '3'THEN '已取消'END AS S FROM orders,address WHERE orders.aid=address.id AND orders.mid=#{mid}
+    </select>
+    <select id="queryAllOrders" resultType="map">
+        SELECT address.name,address.addre,orders.*,CASE orders.status WHEN '0'THEN '待付款' WHEN '1'THEN '待收货' WHEN '2'THEN '已发货'WHEN '3'THEN '已取消'END AS S FROM orders,address WHERE orders.aid=address.id
+    </select>
+    <select id="queryProductCount" resultType="int">
+        SELECT count(id) FROM product
+    </select>
+    <select id="queryOrdersCount" resultType="int">
+        SELECT count(id) FROM orders
+    </select>
+
+</mapper>

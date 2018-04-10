@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hwua.common.dao.MemberMapper">
+    <select id="queryAllMember" resultType="member" parameterType="string">
+        SELECT member.id,member.username,member.id_number idNumber,member.tel,IF(status = 0,'已恢复','已删除') status,IF(isput = 0,'已启用','已禁用') isput FROM member WHERE status=#{status}
+    </select>
+    <select id="queryById" parameterType="int" resultType="member">
+        SELECT member.id,member.username,member.id_number idNumber,member.tel FROM member WHERE id=#{id}
+    </select>
+    <update id="updateMember" parameterType="member">
+        UPDATE member SET username=#{username},tel=#{tel},id_number=#{idNumber} WHERE id=#{id}
+    </update>
+    <insert id="addMember" parameterType="member">
+        INSERT INTO member (username,id_number,tel) VALUES (#{username},#{idNumber},#{tel})
+    </insert>
+    <update id="deleteMember">
+        UPDATE member SET status =#{arg0} WHERE id=#{arg1}
+    </update>
+    <update id="stopMember">
+        UPDATE member SET isput=#{arg0} WHERE id=#{arg1}
+    </update>
+    <select id="queryUser" resultType="map" parameterType="string">
+      SELECT * FROM member WHERE USERNAME = #{arg0} AND PASSWORD=#{arg1}
+    </select>
+    <select id="queryByUsername" resultType="member" parameterType="string">
+        SELECT *FROM member WHERE USERNAME =#{username}
+    </select>
+    <select id="queryById_number" resultType="member" parameterType="string">
+        SELECT * FROM member WHERE ID_NUMBER=#{id_number}
+    </select>
+    <insert id="doCreate" parameterType="map">
+        INSERT INTO member (USERNAME,PASSWORD,ID_NUMBER,TEL)VALUES(#{username},#{password},#{id_number},#{tel})
+    </insert>
+    <update id="doUpDate" parameterType="map">
+        UPDATE member SET PASSWORD=#{password} WHERE USERNAME=#{username}
+    </update>
+    <insert id="addAddress" parameterType="map">
+        INSERT INTO address(name,addre,mid) VALUES (#{name},#{addre},#{mid})
+    </insert>
+    <select id="queryMemberCount" resultType="int">
+        SELECT count(id) FROM member
+    </select>
+    <select id="queryAllAddress" resultType="map" parameterType="int">
+        SELECT * FROM address WHERE mid=#{mid}
+    </select>
+</mapper>

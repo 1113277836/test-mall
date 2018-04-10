@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hwua.common.dao.UserMapper">
+    <select id="login" resultType="user">
+        SELECT * FROM user WHERE username=#{arg0} AND password=#{arg1}
+    </select>
+    <select id="queryAllUser" resultType="user">
+        SELECT user.id,user.username,user.realname,CASE isput WHEN '0'THEN '已启用' WHEN '1' THEN '已禁用'END AS isput FROM user WHERE status=0
+    </select>
+    <update id="updateUserIsput">
+        UPDATE user SET isput=#{arg0} WHERE id=#{arg1}
+    </update>
+</mapper>

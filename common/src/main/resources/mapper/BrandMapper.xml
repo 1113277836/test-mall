@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hwua.common.dao.BrandMapper">
+    <insert id="addBrand" parameterType="brand">
+        INSERT INTO brand (NAME) VALUES (#{name})
+    </insert>
+    <delete id="deleteBrand" parameterType="int">
+        DELETE FROM brand WHERE ID=#{id}
+    </delete>
+    <update id="updateBrand" parameterType="brand">
+        UPDATE brand SET NAME=#{name} WHERE ID=#{id}
+    </update>
+    <select id="queryAllBrand" resultType="brand">
+        SELECT * FROM brand
+    </select>
+    <select id="queryBrandCount" resultType="int">
+        SELECT count(id) FROM brand
+    </select>
+    <select id="queryByBrandName" parameterType="string" resultType="brand">
+        SELECT * FROM brand WHERE name=#{name}
+    </select>
+</mapper>
